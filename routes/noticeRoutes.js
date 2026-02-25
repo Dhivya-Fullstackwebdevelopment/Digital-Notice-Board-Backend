@@ -1,5 +1,5 @@
 import express from "express";
-import Notice from "../models/Notice.js";
+import { Notice, Counter } from "../models/Notice.js";
 import multer from "multer";
 
 const router = express.Router();
@@ -19,11 +19,19 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
     try {
         const { title, categoryId, deptId, content } = req.body;
 
-        // Grab file paths if they exist
+        const counter = await Counter.findOneAndUpdate(
+            { id: "noticeId" },
+            { $inc: { seq: 1 } },
+            { new: true, upsert: true }
+        );
+
+        const newNoticeId = `NTC${counter.seq.toString().padStart(3, '0')}`;
+
         const imagePath = req.files['image'] ? req.files['image'][0].path : "";
         const pdfPath = req.files['pdf'] ? req.files['pdf'][0].path : "";
 
         const newNotice = new Notice({
+            noticeId: newNoticeId,
             title,
             categoryId,
             deptId,
@@ -50,8 +58,9 @@ router.get("/all", async (req, res) => {
 });
 
 // 3. PUT - Update a Notice by ID
-router.patch("/update/:id", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
+        const { noticeId } = req.params;
         const updateData = { ...req.body };
 
         // If new files are uploaded, update the paths
@@ -63,7 +72,7 @@ router.patch("/update/:id", upload.fields([{ name: 'image', maxCount: 1 }, { nam
         }
 
         const updatedNotice = await Notice.findByIdAndUpdate(
-            req.params.id,
+            { noticeId: noticeId },
             { $set: updateData },
             { new: true }
         );
