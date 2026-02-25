@@ -27,8 +27,8 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
 
         const newNoticeId = `NTC${counter.seq.toString().padStart(3, '0')}`;
 
-        const imagePath = req.files['image'] ? req.files['image'][0].path : "";
-        const pdfPath = req.files['pdf'] ? req.files['pdf'][0].path : "";
+        const imagePath = req.files && req.files['image'] ? req.files['image'][0].path : "";
+        const pdfPath = req.files && req.files['pdf'] ? req.files['pdf'][0].path : "";
 
         const newNotice = new Notice({
             noticeId: newNoticeId,
@@ -41,9 +41,19 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
         });
 
         const savedNotice = await newNotice.save();
-        res.status(201).json({ message: "Notice Created Successfully", data: savedNotice });
+
+        res.status(201).json({
+            Status: 1,
+            message: "Notice Created Successfully",
+            data: savedNotice
+        });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            Status: 0,
+            message: "Failed to create notice",
+            error: error.message
+        });
     }
 });
 
@@ -51,9 +61,9 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
 router.get("/all", async (req, res) => {
     try {
         const notices = await Notice.find();
-        res.status(200).json(notices);
+        res.status(200).json({ Status: 1, message: "Notices fetched successfully", data: notices });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ Status: 0, error: error.message });
     }
 });
 
@@ -63,15 +73,12 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
         const { noticeId } = req.params;
         const updateData = { ...req.body };
 
-        // If new files are uploaded, update the paths
-        if (req.files && req.files['image']) {
-            updateData.image = req.files['image'][0].path;
-        }
-        if (req.files && req.files['pdf']) {
-            updateData.pdf = req.files['pdf'][0].path;
+        if (req.files) {
+            if (req.files['image']) updateData.image = req.files['image'][0].path;
+            if (req.files['pdf']) updateData.pdf = req.files['pdf'][0].path;
         }
 
-        const updatedNotice = await Notice.findByIdAndUpdate(
+        const updatedNotice = await Notice.findOneAndUpdate(
             { noticeId: noticeId },
             { $set: updateData },
             { new: true }
@@ -79,19 +86,37 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
 
         if (!updatedNotice) return res.status(404).json({ message: "Notice not found" });
 
-        res.status(200).json({ message: "Notice Updated Successfully", data: updatedNotice });
+        res.status(200).json({ Status: 1, message: "Notice Updated Successfully", data: updatedNotice });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ Status: 0, error: error.message });
     }
 });
 
 // 4. DELETE - Delete a Notice by ID
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:noticeId", async (req, res) => {
     try {
-        await Notice.findByIdAndDelete(req.params.id);
-        res.status(200).json("Notice has been deleted...");
+
+        const deletedNotice = await Notice.findOneAndDelete({ noticeId: req.params.noticeId });
+
+        if (!deletedNotice) {
+            return res.status(404).json({
+                Status: 0,
+                message: "Notice not found. Nothing deleted."
+            });
+        }
+
+        res.status(200).json({
+            Status: 1,
+            message: "Notice deleted successfully",
+            deletedId: req.params.noticeId
+        });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            Status: 0,
+            message: "An error occurred during deletion",
+            error: error.message
+        });
     }
 });
 
