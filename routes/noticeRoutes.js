@@ -1,5 +1,6 @@
 import express from "express";
 import Notice from "../models/Notice.js";
+import multer from "multer";
 
 const router = express.Router();
 
@@ -64,7 +65,7 @@ router.patch("/update/:id", upload.fields([{ name: 'image', maxCount: 1 }, { nam
         const updatedNotice = await Notice.findByIdAndUpdate(
             req.params.id,
             { $set: updateData },
-            { new: true } 
+            { new: true }
         );
 
         if (!updatedNotice) return res.status(404).json({ message: "Notice not found" });
