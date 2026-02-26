@@ -120,4 +120,33 @@ router.delete("/delete/:noticeId", async (req, res) => {
     }
 });
 
+// 5. GET - Get a single Notice by noticeId
+router.get("/:noticeId", async (req, res) => {
+    try {
+        const { noticeId } = req.params;
+
+        const notice = await Notice.findOne({ noticeId: noticeId });
+
+        if (!notice) {
+            return res.status(404).json({
+                Status: 0,
+                message: "Notice not found"
+            });
+        }
+
+        res.status(200).json({
+            Status: 1,
+            message: "Notice details fetched successfully",
+            data: notice
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            Status: 0,
+            message: "An error occurred while fetching the notice",
+            error: error.message
+        });
+    }
+});
+
 export default router;
