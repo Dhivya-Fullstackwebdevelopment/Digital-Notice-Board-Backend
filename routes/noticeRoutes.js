@@ -2,6 +2,32 @@ import express from "express";
 import { Notice, Counter } from "../models/Notice.js";
 import multer from "multer";
 
+const CATEGORIES = [
+    { id: "1", label: "Academic" }, { id: "2", label: "Event" },
+    { id: "3", label: "Emergency" }, { id: "4", label: "Placement" },
+    { id: "5", label: "Examination" }, { id: "6", label: "Scholarship" },
+    { id: "7", label: "Sports" }, { id: "8", label: "Hostel" },
+    { id: "9", label: "Library" }, { id: "10", label: "Competition" },
+    { id: "99", label: "Other" }
+];
+
+const DEPARTMENTS = [
+    { id: "1", label: "Computer Science & Engineering" },
+    { id: "2", label: "Information Technology" },
+    { id: "3", label: "Electronics & Communication" },
+    { id: "4", label: "Electrical & Electronics" },
+    { id: "5", label: "Mechanical Engineering" },
+    { id: "6", label: "Civil Engineering" },
+    { id: "7", label: "Artificial Intelligence" },
+    { id: "8", label: "MBA" },
+    { id: "9", label: "BBA" },
+    { id: "10", label: "B.Com" },
+    { id: "99", label: "Other" }
+];
+
+const getCategoryLabel = (id) => CATEGORIES.find(c => c.id === id)?.label || "";
+const getDeptLabel = (id) => DEPARTMENTS.find(d => d.id === id)?.label || "";
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -18,8 +44,8 @@ const upload = multer({ storage: storage });
 router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, categoryId, deptId, content, otherCategory, otherDept } = req.body;
-        const finalCategory = categoryId == "99" ? `Other: ${otherCategory}` : categoryId;
-        const finalDept = deptId == "99" ? `Other: ${otherDept}` : deptId;
+        const categoryName = categoryId === "99" ? otherCategory : getCategoryLabel(categoryId);
+        const deptName = deptId === "99" ? otherDept : getDeptLabel(deptId);
 
         const counter = await Counter.findOneAndUpdate(
             { id: "noticeId" },
@@ -37,6 +63,8 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
             title,
             categoryId,
             deptId,
+            categoryName,
+            deptName,
             otherCategory: categoryId === "99" ? otherCategory : "",
             otherDept: deptId === "99" ? otherDept : "",
             content,
@@ -77,12 +105,21 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
         const { noticeId } = req.params;
         const updateData = { ...req.body };
 
+        // If category is updated, update the Name as well
         if (updateData.categoryId) {
+            updateData.categoryName = updateData.categoryId === "99"
+                ? updateData.otherCategory
+                : getCategoryLabel(updateData.categoryId);
+
             updateData.otherCategory = updateData.categoryId === "99" ? updateData.otherCategory : "";
         }
 
-        // Handle Logic for Department "Other"
+        // If department is updated, update the Name as well
         if (updateData.deptId) {
+            updateData.deptName = updateData.deptId === "99"
+                ? updateData.otherDept
+                : getDeptLabel(updateData.deptId);
+
             updateData.otherDept = updateData.deptId === "99" ? updateData.otherDept : "";
         }
 
