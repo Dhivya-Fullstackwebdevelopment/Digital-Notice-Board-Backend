@@ -12,9 +12,11 @@ const noticeSchema = new mongoose.Schema({
     title: { type: String, required: true },
     categoryId: { type: String, required: true },
     deptId: { type: String, required: true },
+    otherCategory: { type: String, default: "" },
+    otherDept: { type: String, default: "" },
     content: { type: String, required: true },
     image: { type: String },
-    pdf: { type: String }
+    pdf: { type: String },
 }, { timestamps: true });
 
 const Notice = mongoose.model("Notice", noticeSchema);

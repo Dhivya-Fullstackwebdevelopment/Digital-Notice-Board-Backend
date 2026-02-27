@@ -17,7 +17,9 @@ const upload = multer({ storage: storage });
 // 1. POST - Create a new Notice
 router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
-        const { title, categoryId, deptId, content } = req.body;
+        const { title, categoryId, deptId, content, otherCategory, otherDept } = req.body;
+        const finalCategory = categoryId == "99" ? `Other: ${otherCategory}` : categoryId;
+        const finalDept = deptId == "99" ? `Other: ${otherDept}` : deptId;
 
         const counter = await Counter.findOneAndUpdate(
             { id: "noticeId" },
@@ -35,6 +37,8 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
             title,
             categoryId,
             deptId,
+            otherCategory: categoryId === "99" ? otherCategory : "",
+            otherDept: deptId === "99" ? otherDept : "",
             content,
             image: imagePath,
             pdf: pdfPath
@@ -72,6 +76,15 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
     try {
         const { noticeId } = req.params;
         const updateData = { ...req.body };
+
+        if (updateData.categoryId) {
+            updateData.otherCategory = updateData.categoryId === "99" ? updateData.otherCategory : "";
+        }
+
+        // Handle Logic for Department "Other"
+        if (updateData.deptId) {
+            updateData.otherDept = updateData.deptId === "99" ? updateData.otherDept : "";
+        }
 
         if (req.files) {
             if (req.files['image']) updateData.image = req.files['image'][0].path;
