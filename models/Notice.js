@@ -20,4 +20,5 @@ const noticeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Notice = mongoose.model("Notice", noticeSchema);
+
 export { Notice, Counter };

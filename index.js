@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import noticeRoutes from "./routes/noticeRoutes.js";
+import complaintRoutes from "./routes/complaintRoutes.js";
 
 dotenv.config();
 
@@ -24,3 +25,4 @@ mongoose.connect(MONGO_URL).then(() => {
 });
 
 app.use("/api/notices", noticeRoutes);
+app.use("/api/complaints", complaintRoutes); 
