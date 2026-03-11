@@ -5,6 +5,7 @@ import cors from "cors";
 import noticeRoutes from "./routes/noticeRoutes.js";
 import complaintRoutes from "./routes/complaintRoutes.js";
 import studentAuth from "./routes/studentAuth.js"
+import adminRoutes from "./routes/admin.js"
 
 dotenv.config();
 
@@ -28,3 +29,4 @@ mongoose.connect(MONGO_URL).then(() => {
 app.use("/api/notices", noticeRoutes);
 app.use("/api/complaints", complaintRoutes); 
 app.use("/api/students", studentAuth);
+app.use("/api/admin", adminRoutes);
