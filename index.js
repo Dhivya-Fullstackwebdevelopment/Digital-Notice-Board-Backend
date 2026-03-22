@@ -4,8 +4,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import noticeRoutes from "./routes/noticeRoutes.js";
 import complaintRoutes from "./routes/complaintRoutes.js";
-import studentAuth from "./routes/studentAuth.js"
-import adminRoutes from "./routes/admin.js"
+import studentAuth from "./routes/studentAuth.js";
+import adminRoutes from "./routes/admin.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -17,6 +19,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 7000;
 const MONGO_URL = process.env.MONGO_URL;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 mongoose.connect(MONGO_URL).then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {
@@ -26,6 +31,7 @@ mongoose.connect(MONGO_URL).then(() => {
     console.error("Error connecting to MongoDB:", error);
 });
 
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/notices", noticeRoutes);
 app.use("/api/complaints", complaintRoutes); 
 app.use("/api/students", studentAuth);

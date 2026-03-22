@@ -45,6 +45,7 @@ const upload = multer({ storage: storage });
 // 1. POST - Create a new Notice
 router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
+        const baseUrl = "http://localhost:8000/api/";
         const { title, categoryId, deptId, content, otherCategory, otherDept } = req.body;
         const categoryName = categoryId === "99" ? otherCategory : getCategoryLabel(categoryId);
         const deptName = deptId === "99" ? otherDept : getDeptLabel(deptId);
@@ -57,8 +58,13 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
 
         const newNoticeId = `NTC${counter.seq.toString().padStart(3, '0')}`;
 
-        const imagePath = req.files && req.files['image'] ? req.files['image'][0].path : "";
-        const pdfPath = req.files && req.files['pdf'] ? req.files['pdf'][0].path : "";
+        const imageUrl = req.files['image']
+            ? `${baseUrl}${req.files['image'][0].path.replace(/\\/g, '/')}`
+            : "";
+
+        const pdfUrl = req.files['pdf']
+            ? `${baseUrl}${req.files['pdf'][0].path.replace(/\\/g, '/')}`
+            : "";
 
         const newNotice = new Notice({
             noticeId: newNoticeId,
@@ -70,8 +76,8 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
             otherCategory: categoryId === "99" ? otherCategory : "",
             otherDept: deptId === "99" ? otherDept : "",
             content,
-            image: imagePath,
-            pdf: pdfPath
+            image: imageUrl,
+            pdf: pdfUrl
         });
 
         const savedNotice = await newNotice.save();
