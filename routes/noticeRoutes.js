@@ -3,6 +3,7 @@ import { Notice, Counter } from "../models/Notice.js";
 import multer from "multer";
 
 const CATEGORIES = [
+    { id: "0", label: "All" },
     { id: "1", label: "Academic" }, { id: "2", label: "Event" },
     { id: "3", label: "Emergency" }, { id: "4", label: "Placement" },
     { id: "5", label: "Examination" }, { id: "6", label: "Scholarship" },
@@ -12,6 +13,7 @@ const CATEGORIES = [
 ];
 
 const DEPARTMENTS = [
+    { id: "0", label: "All" },
     { id: "1", label: "Computer Science & Engineering" },
     { id: "2", label: "Information Technology" },
     { id: "3", label: "Electronics & Communication" },
@@ -92,7 +94,7 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
 // 2. GET - Get all Notices
 router.get("/all", async (req, res) => {
     try {
-        const notices = await Notice.find();
+        const notices = await Notice.find().sort({ _id: -1 });
         res.status(200).json({ Status: 1, message: "Notices fetched successfully", data: notices });
     } catch (error) {
         res.status(500).json({ Status: 0, error: error.message });
@@ -105,7 +107,6 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
         const { noticeId } = req.params;
         const updateData = { ...req.body };
 
-        // If category is updated, update the Name as well
         if (updateData.categoryId) {
             updateData.categoryName = updateData.categoryId === "99"
                 ? updateData.otherCategory
@@ -114,7 +115,6 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
             updateData.otherCategory = updateData.categoryId === "99" ? updateData.otherCategory : "";
         }
 
-        // If department is updated, update the Name as well
         if (updateData.deptId) {
             updateData.deptName = updateData.deptId === "99"
                 ? updateData.otherDept
