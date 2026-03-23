@@ -93,7 +93,7 @@ router.post("/create", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'p
             status: status || "pending",
             subject,
             description,
-            resolution: resolution || "", // Add resolution if provided
+            resolution: resolution || "",
             categoryId,
             otherCategory: categoryId === "99" ? otherCategory : "",
             deptId,
@@ -144,7 +144,8 @@ router.patch("/update/:complaintId", upload.fields([{ name: 'image', maxCount: 1
         const updated = await Complaint.findOneAndUpdate(
             { complaintId: complaintId },
             { $set: updateData },
-            { new: true }
+            { returnDocument: 'after' }
+
         );
 
         if (!updated) return res.status(404).json({ Status: 0, message: "Complaint Not Found" });

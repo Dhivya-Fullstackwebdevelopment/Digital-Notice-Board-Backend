@@ -4,11 +4,13 @@ import mongoose from "mongoose";
 const complaintSchema = new mongoose.Schema({
     complaintId: { type: String, unique: true },
     studentName: String,
-    status: { type: String, default: "pending" }, 
-    categoryId: String, 
+    status: { type: String, default: "pending" },
+    categoryId: String,
+    categoryName: String,
     otherCategory: String,
-    deptId: String,     
-    otherDept: String,  
+    deptId: String,
+    deptName: String,
+    otherDept: String,
     subject: String,
     description: String,
     resolution: { type: String, default: "" }, // Admin Only

@@ -137,7 +137,7 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
         const updatedNotice = await Notice.findOneAndUpdate(
             { noticeId: noticeId },
             { $set: updateData },
-            { new: true }
+            { returnDocument: 'after'}
         );
 
         if (!updatedNotice) return res.status(404).json({ message: "Notice not found" });
