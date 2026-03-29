@@ -7,6 +7,7 @@ import complaintRoutes from "./routes/complaintRoutes.js";
 import studentAuth from "./routes/studentAuth.js";
 import adminRoutes from "./routes/admin.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import notificationRoutes from "./routes/notifications.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -38,3 +39,4 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/students", studentAuth);
 app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);

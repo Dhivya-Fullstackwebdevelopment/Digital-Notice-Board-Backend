@@ -15,7 +15,8 @@ const complaintSchema = new mongoose.Schema({
     description: String,
     resolution: { type: String, default: "" }, // Admin Only
     image: String,
-    pdf: String
+    pdf: String,
+    isRead: { type: Boolean, default: false }, // for notifications only
 }, { timestamps: true });
 
 export const Complaint = mongoose.model("Complaint", complaintSchema);
