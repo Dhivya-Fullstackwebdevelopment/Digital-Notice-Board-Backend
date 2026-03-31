@@ -107,12 +107,14 @@ router.get("/all", async (req, res) => {
     }
 });
 
-// 3. PUT - Update a Notice by ID
+// 3. PATCH - Update a Notice by ID
 router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const { noticeId } = req.params;
+        const baseUrl = "http://localhost:8000/api/"; 
         const updateData = { ...req.body };
 
+        // 1. Handle Category Logic
         if (updateData.categoryId) {
             updateData.categoryName = updateData.categoryId === "99"
                 ? updateData.otherCategory
@@ -130,19 +132,30 @@ router.patch("/update/:noticeId", upload.fields([{ name: 'image', maxCount: 1 },
         }
 
         if (req.files) {
-            if (req.files['image']) updateData.image = req.files['image'][0].path;
-            if (req.files['pdf']) updateData.pdf = req.files['pdf'][0].path;
+            if (req.files['image']) {
+                updateData.image = `${baseUrl}${req.files['image'][0].path.replace(/\\/g, '/')}`;
+            }
+            if (req.files['pdf']) {
+                updateData.pdf = `${baseUrl}${req.files['pdf'][0].path.replace(/\\/g, '/')}`;
+            }
         }
 
         const updatedNotice = await Notice.findOneAndUpdate(
             { noticeId: noticeId },
             { $set: updateData },
-            { returnDocument: 'after'}
+            { new: true } 
         );
 
-        if (!updatedNotice) return res.status(404).json({ message: "Notice not found" });
+        if (!updatedNotice) {
+            return res.status(404).json({ Status: 0, message: "Notice not found" });
+        }
 
-        res.status(200).json({ Status: 1, message: "Notice Updated Successfully", data: updatedNotice });
+        res.status(200).json({ 
+            Status: 1, 
+            message: "Notice Updated Successfully", 
+            data: updatedNotice 
+        });
+
     } catch (error) {
         res.status(500).json({ Status: 0, error: error.message });
     }
