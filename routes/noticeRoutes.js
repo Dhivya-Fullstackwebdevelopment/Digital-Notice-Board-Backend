@@ -218,4 +218,48 @@ router.get("/:noticeId", async (req, res) => {
     }
 });
 
+// 6. GET - Fetch notifications (Notices from the last 7 days)
+router.get("/usernotifications/list", async (req, res) => {
+    try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const notifications = await Notice.find({
+            createdAt: { $gte: sevenDaysAgo },
+            hiddenInNotifications: { $ne: true }
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            Status: 1,
+            count: notifications.length,
+            message: "Recent notice notifications fetched successfully",
+            data: notifications
+        });
+    } catch (error) {
+        res.status(500).json({ Status: 0, error: error.message });
+    }
+});
+
+// 7. PATCH - Clear All Notice Notifications
+router.patch("/usernotifications/clear-all", async (req, res) => {
+    try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        await Notice.updateMany(
+            { 
+                createdAt: { $gte: sevenDaysAgo },
+                hiddenInNotifications: { $ne: true }
+            },
+            { $set: { hiddenInNotifications: true } }
+        );
+
+        res.status(200).json({
+            Status: 1,
+            message: "All notice notifications cleared successfully"
+        });
+    } catch (error) {
+        res.status(500).json({ Status: 0, error: error.message });
+    }
+});
 export default router;
